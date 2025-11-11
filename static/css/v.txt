@@ -1,0 +1,122 @@
+// Dashboard functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize clock
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    // Initialize exp bar
+    updateExpBar();
+    
+    // Handle task completion
+    document.querySelectorAll('.complete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const taskItem = this.closest('.task-item');
+            const taskId = taskItem.dataset.id;
+            completeTask(taskId);
+        });
+    });
+    
+    // Handle new task form submission
+    const newTaskForm = document.getElementById('new-task-form');
+    if (newTaskForm) {
+        newTaskForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            addNewTask(formData);
+        });
+    }
+});
+
+// Update the clock display
+function updateClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    const timeString = `${hours}:${minutes}:${seconds}`;
+    document.getElementById('clock').textContent = timeString;
+    
+    // Check if it's a new day (midnight) to refresh tasks
+    if (hours === '00' && minutes === '00' && seconds === '00') {
+        location.reload();
+    }
+}
+
+// Update the experience bar
+function updateExpBar() {
+    // Calculate daily exp from completed tasks
+    let dailyExp = 0;
+    document.querySelectorAll('.task-item.completed').forEach(task => {
+        dailyExp += parseInt(task.dataset.exp);
+    });
+    
+    // Max exp is 500
+    const maxExp = 500;
+    const percentage = Math.min((dailyExp / maxExp) * 100, 100);
+    
+    // Update the exp bar
+    const expBar = document.getElementById('exp-bar');
+    expBar.style.width = `${percentage}%`;
+    
+    // Update the exp text
+    document.getElementById('current-exp').textContent = dailyExp;
+}
+
+// Mark a task as complete
+function completeTask(taskId) {
+    fetch(`/api/tasks/${taskId}/complete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update task UI
+            const taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
+            taskItem.classList.add('completed');
+            
+            // Update complete button
+            const completeBtn = taskItem.querySelector('.complete-btn');
+            completeBtn.disabled = true;
+            completeBtn.querySelector('i').classList.remove('fa-circle');
+            completeBtn.querySelector('i').classList.add('fa-check-circle');
+            
+            // Update exp bar
+            updateExpBar();
+            
+            // Update total exp
+            const totalExpElement = document.getElementById('total-exp');
+            totalExpElement.textContent = parseInt(totalExpElement.textContent) + data.exp_gained;
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+
+// Add a new task
+function addNewTask(formData) {
+    fetch('/api/tasks', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Refresh page to show new task
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}

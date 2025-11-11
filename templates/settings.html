@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - TaskXP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="settings-card">
+            <div class="card-header">
+                <a href="{{ url_for('dashboard') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1>Settings</h1>
+            </div>
+            
+            <form action="{{ url_for('settings') }}" method="POST">
+                <div class="form-group">
+                    <label for="theme">Theme</label>
+                    <select id="theme" name="theme">
+                        <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>Light</option>
+                        <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>Dark</option>
+                    </select>
+                </div>
+                
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="notification" name="notification_enabled" {% if settings.notification_enabled %}checked{% endif %}>
+                    <label for="notification">Enable Notifications</label>
+                </div>
+                
+                <button type="submit" class="btn primary full-width">Save Settings</button>
+            </form>
+            
+            <div class="danger-zone">
+                <h3>Account Actions</h3>
+                <a href="{{ url_for('logout') }}" class="btn danger">Logout</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

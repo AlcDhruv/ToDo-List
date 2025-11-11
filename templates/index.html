@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - TaskXP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header section -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <a href="{{ url_for('settings') }}" class="settings-btn">
+                    <i class="fas fa-cog"></i>
+                </a>
+            </div>
+            <div class="header-center">
+                <div class="exp-bar-container">
+                    <div class="exp-bar" id="exp-bar"></div>
+                    <div class="exp-text"><span id="current-exp">0</span>/500 XP</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="clock-container" id="clock">00:00:00</div>
+            </div>
+        </header>
+        
+        <!-- Main content -->
+        <main class="dashboard-content">
+            <div class="task-list-container">
+                <h2>Today's Tasks</h2>
+                <div class="task-list" id="task-list">
+                    {% if tasks %}
+                        {% for task in tasks %}
+                            <div class="task-item {% if task.is_completed %}completed{% endif %}" data-id="{{ task.task_id }}" data-exp="{{ task.exp_value }}">
+                                <div class="task-info">
+                                    <h3>{{ task.task_name }}</h3>
+                                    <p>{{ task.task_description }}</p>
+                                </div>
+                                <div class="task-actions">
+                                    <span class="exp-badge">{{ task.exp_value }} XP</span>
+                                    <div class="task-controls">
+                                        {% if task.predefined_task_id %}
+                                        <div class="daily-toggle">
+                                            <input type="checkbox" id="daily-{{ task.task_id }}" class="daily-checkbox" data-task-id="{{ task.task_id }}" {% if task.is_daily %}checked{% endif %}>
+                                            <label for="daily-{{ task.task_id }}">Daily</label>
+                                        </div>
+                                        {% endif %}
+                                        <button class="remove-btn" data-id="{{ task.task_id }}">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <button class="complete-btn" {% if task.is_completed %}disabled{% endif %}>
+                                            <i class="fas {% if task.is_completed %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-tasks">
+                            <p>No tasks for today. Add a new task!</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="add-task-form">
+                    <h3>Add New Task</h3>
+                    <form id="new-task-form">
+                        <div class="form-group">
+                            <label for="predefined-task">Select Task</label>
+                            <select id="predefined-task" name="predefined_task_id">
+                                <option value="">-- Select a task --</option>
+                                {% for category, tasks in predefined_tasks.items() %}
+                                    <optgroup label="{{ category }}">
+                                        {% for task in tasks %}
+                                            <option value="{{ task.predefined_task_id }}" data-exp="{{ task.default_exp_value }}">{{ task.task_name }} ({{ task.default_exp_value }} XP)</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <textarea id="task-description" name="task_description" placeholder="Add details about your task (optional)"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <input type="number" id="task-exp" name="exp_value" placeholder="XP value" min="1" max="100" required>
+                        </div>
+                        
+                        <div class="form-group checkbox">
+                            <input type="checkbox" id="is-daily" name="is_daily">
+                            <label for="is-daily">Add as daily recurring task</label>
+                        </div>
+                        
+                        <button type="submit" class="btn primary">Add Task</button>
+                    </form>
+                    
+                    <div class="custom-task-section">
+                        <h4>Can't find what you're looking for?</h4>
+                        <button id="custom-task-btn" class="btn secondary">Submit New Task</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Custom Task Modal -->
+        <div id="custom-task-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h3>Submit New Task</h3>
+                <form id="custom-task-form">
+                    <div class="form-group">
+                        <label for="custom-task-name">Task Name</label>
+                        <input type="text" id="custom-task-name" name="task_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="custom-task-exp">Suggested XP Value</label>
+                        <input type="number" id="custom-task-exp" name="suggested_exp_value" min="1" max="100" required>
+                    </div>
+                    <button type="submit" class="btn primary">Submit for Approval</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Footer section -->
+        <footer class="dashboard-footer">
+            <div class="user-profile">
+                <div class="profile-pic">
+                    <img src="{{ url_for('static', filename='images/' + user.profile_pic) }}" alt="Profile">
+                </div>
+                <div class="user-info">
+                    <h3>{{ user.username }}</h3>
+                    <p><span id="total-exp">{{ user.total_exp }}</span> XP</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
