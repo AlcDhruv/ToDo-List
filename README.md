@@ -1,1 +1,1 @@
-<pre> ```text wpproject/ │ ├── app.py # Main Flask application ├── .env # Environment variables (create this file) │ ├── static/ │ ├── css/ │ │ └── style.css # CSS styles │ │ │ ├── js/ │ │ └── dashboard.js # JavaScript for dashboard functionality │ │ │ └── images/ │ └── default.png # Default profile picture │ └── templates/ ├── opener.html # Welcome page ├── signup.html # Sign up page ├── login.html # Login page ├── index.html # Dashboard └── settings.html # Settings page ``` </pre>
+
